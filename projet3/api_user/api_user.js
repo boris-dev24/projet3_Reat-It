@@ -45,6 +45,23 @@ connectToDB().then(() => {
     });
 });
 
+
+const checkAuth = (req, res, next) => {
+    const token = req.headers['authorization']?.split(' ')[1];
+    if (!token) {
+        return res.status(401).json({ message: 'Unauthorized, please login' });
+    }
+    
+    try {
+        const decoded = jwt.verify(token, 'votre_clé_secrète');
+        req.user = decoded;
+        next();
+    } catch (err) {
+        return res.status(401).json({ message: 'Invalid token' });
+    }
+};
+
+
 app.post('/register', async (req, res) => {
     try {
         const { username, password, name, profil } = req.body;
@@ -91,6 +108,23 @@ app.post('/login', async (req, res) => {
         const token = jwt.sign({ userId: user._id }, 'votre_clé_secrète', { expiresIn: '1h' });
 
         res.status(200).json({ message: 'Connexion réussie', token });
+    } catch (err) {
+        res.status(500).json({ message: 'Erreur serveur', error: err });
+    }
+});
+
+
+
+// Route pour récupérer le username de l'utilisateur connecté
+app.get('/get-username', checkAuth, async (req, res) => {
+    try {
+        const user = await PositionModel.findOne({ _id: new ObjectId(req.user.userId) });
+        
+        if (!user) {
+            return res.status(404).json({ message: 'Utilisateur non trouvé' });
+        }
+        
+        res.status(200).json({ username: user.username });
     } catch (err) {
         res.status(500).json({ message: 'Erreur serveur', error: err });
     }

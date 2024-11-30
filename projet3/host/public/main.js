@@ -19,6 +19,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const newAnswerForm = document.getElementById('newAnswerForm');
     const registerPage = document.getElementById('registerPage');
     const logInPage = document.getElementById('logInPage');
+    
 
     // Boutons de formulaire
     const sendMessageButton = document.getElementById('sendMessageButton');
@@ -295,7 +296,54 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
 
-    // Fonction pour afficher les messages
+    // // Fonction pour afficher les messages
+    // function displayMessages(messages) {
+    //     homeSection.innerHTML = '';
+    //     messages.slice(0, 10).forEach(message => {
+    //         const messageElement = document.createElement('div');
+    //         messageElement.classList.add('message');
+    //         messageElement.innerHTML = `
+    //             <h3>${message.title}</h3>
+    //             <p>${message.text.substring(0, 250)}</p>
+    //             <div class="message-footer">
+    //                 <span>Publié par: ${message.user}</span>
+    //                 <span>Le: ${new Date(message.date).toLocaleString()}</span>
+    //                 <div class="message-actions">
+    //                     <button class="like-btn">👍 ${message.likes || 0}</button>
+    //                     <button class="dislike-btn">👎 ${message.dislikes || 0}</button>
+    //                     <span>: ${(message.likes || 0) - (message.dislikes || 0)}</span>
+    //                     ${currentToken ? `<button class="add-answer-btn">Ajouter une réponse</button>` : ''}
+    //                 </div>
+    //             </div>
+    //         `;
+    //         homeSection.appendChild(messageElement);
+    //     });
+    // }
+    //   fetchMessages();
+
+    // messagesBtn.addEventListener('click', async () => {
+    //     if (!currentToken) {
+    //         alert('Veuillez vous connecter');
+    //         return;
+    //     }
+    
+    //     try {
+    //         const response = await fetch('http://localhost:3002/user-messages', {
+    //             method: 'GET',
+    //             headers: {
+    //                 'Authorization': `Bearer ${currentToken}`
+    //             }
+    //         });
+    
+    //         const userMessages = await response.json();
+    //         displayMessages(userMessages);
+    //     } catch (error) {
+    //         console.error('Erreur de récupération des messages personnels:', error);
+    //         alert('Impossible de récupérer vos messages');
+    //     }
+    // });
+
+
     function displayMessages(messages) {
         homeSection.innerHTML = '';
         messages.slice(0, 10).forEach(message => {
@@ -305,45 +353,66 @@ document.addEventListener('DOMContentLoaded', () => {
                 <h3>${message.title}</h3>
                 <p>${message.text.substring(0, 250)}</p>
                 <div class="message-footer">
-                    <span>Publié par: ${message.user}</span>
-                    <span>Le: ${new Date(message.date).toLocaleString()}</span>
+                    <span>${message.user}</span>
+                    <span>${formatDate(message.createdAt)}</span>
                     <div class="message-actions">
-                        <button class="like-btn">👍 ${message.likes || 0}</button>
-                        <button class="dislike-btn">👎 ${message.dislikes || 0}</button>
-                        <span>: ${(message.likes || 0) - (message.dislikes || 0)}</span>
+                        <button class="like-btn" data-message-id="${message._id}" data-vote-type="like">👍 ${message.likes || 0}</button>
+                        <button class="dislike-btn" data-message-id="${message._id}" data-vote-type="dislike">👎 ${message.dislikes || 0}</button>
+                        <span>Solde: ${(message.likes || 0) - (message.dislikes || 0)}</span>
                         ${currentToken ? `<button class="add-answer-btn">Ajouter une réponse</button>` : ''}
                     </div>
                 </div>
             `;
             homeSection.appendChild(messageElement);
         });
-    }
-      fetchMessages();
-
-    messagesBtn.addEventListener('click', async () => {
-        if (!currentToken) {
-            alert('Veuillez vous connecter');
-            return;
-        }
     
-        try {
-            const response = await fetch('http://localhost:3002/user-messages', {
-                method: 'GET',
-                headers: {
-                    'Authorization': `Bearer ${currentToken}`
+        // Ajouter les écouteurs d'événements pour les likes/dislikes
+        homeSection.querySelectorAll('.like-btn, .dislike-btn').forEach(button => {
+            button.addEventListener('click', async (e) => {
+                if (!currentToken) {
+                    alert('Veuillez vous connecter');
+                    return;
+                }
+    
+                const messageId = e.target.dataset.messageId;
+                const voteType = e.target.dataset.voteType;
+    
+                try {
+                    const response = await fetch(`http://localhost:3002/message/${messageId}/vote`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${currentToken}`
+                        },
+                        body: JSON.stringify({ type: voteType })
+                    });
+    
+                    if (response.ok) {
+                        // Mettre à jour les messages après le vote
+                        await fetchMessages();
+                    } else {
+                        const data = await response.json();
+                        alert(data.message);
+                    }
+                } catch (error) {
+                    console.error('Erreur lors du vote:', error);
+                    alert('Une erreur est survenue');
                 }
             });
+        });
+    }
     
-            const userMessages = await response.json();
-            displayMessages(userMessages);
-        } catch (error) {
-            console.error('Erreur de récupération des messages personnels:', error);
-            alert('Impossible de récupérer vos messages');
-        }
-    });
+    // Fonction pour formater la date
+    function formatDate(dateString) {
+        const date = new Date(dateString);
+        return date.toLocaleDateString('fr-FR', {
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric'
+        });
+    }
 
     // Initialisation
     updateUIBasedOnAuthStatus();
 });
 
-   

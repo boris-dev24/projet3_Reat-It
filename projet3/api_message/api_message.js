@@ -96,33 +96,106 @@ const checkAuth = (req, res, next) => {
 // });
 
 
+// app.post('/message', checkAuth, async (req, res) => {
+//     const { title, text,} = req.body;
+    
+//     try {
+//         const date = new Date().toLocaleDateString('fr-CA');
+//         const newMessage = {
+//             title,
+//             text,
+//             user: req.user.username,
+//             createdAt: date,
+//             likes: 0,
+//             dislikes: 0,
+//             answers: []
+//         };
+        
+//         const result = await messagesCollection.insertOne(newMessage);
+//         res.status(200).json({ 
+//             status: 'ok', 
+//             id: result.insertedId, 
+//             message: newMessage 
+//         });
+//     } catch (err) {
+//         res.status(500).json({ message: 'Error saving message', error: err.toString() });
+//     }
+// });
 app.post('/message', checkAuth, async (req, res) => {
-    const { title, text,} = req.body;
+    const { title, text } = req.body;
+    
+    console.log('Requête de création de message reçue');
+    console.log('User ID:', req.user.userId);
+    console.log('Titre:', title);
+    console.log('Texte:', text);
     
     try {
-        const date = new Date().toLocaleDateString('fr-CA');
+        // Modification importante : connexion à la collection utilisateurs
+        const usersCollection = client.db("administration").collection("users");
+        
+        const user = await usersCollection.findOne({ _id: new ObjectId(req.user.userId) });
+        
+        console.log('Utilisateur trouvé:', user);
+        
+        if (!user) {
+            return res.status(404).json({ message: 'Utilisateur non trouvé' });
+        }
+
         const newMessage = {
             title,
             text,
-            user: req.user.username,
-            createdAt: date,
+            userId: req.user.userId,
+            user: user.username, // Utiliser le username de la base de données
+            createdAt: new Date(),
             likes: 0,
             dislikes: 0,
             answers: []
         };
         
         const result = await messagesCollection.insertOne(newMessage);
+        
+        console.log('Message créé avec succès:', result);
+        
         res.status(200).json({ 
             status: 'ok', 
             id: result.insertedId, 
             message: newMessage 
         });
     } catch (err) {
-        res.status(500).json({ message: 'Error saving message', error: err.toString() });
+        console.error('Erreur détaillée lors de la création du message:', err);
+        res.status(500).json({ 
+            message: 'Error saving message', 
+            error: err.toString(),
+            stack: err.stack 
+        });
     }
 });
 
-// Route pour récupérer les messages publics
+// // Route pour récupérer les messages publics
+// app.get('/messages', async (req, res) => {
+//     const { search } = req.query;
+    
+//     try {
+//         let query = {};
+//         if (search) {
+//             query = {
+//                 $or: [
+//                     { title: { $regex: search, $options: 'i' } },
+//                     { text: { $regex: search, $options: 'i' } }
+//                 ]
+//             };
+//         }
+        
+//         const messages = await messagesCollection
+//             .find(query)
+//             .limit(10)
+//             .toArray();
+        
+//         res.status(200).json(messages);
+//     } catch (err) {
+//         res.status(500).json({ message: 'Error retrieving messages', error: err });
+//     }
+// });
 app.get('/messages', async (req, res) => {
     const { search } = req.query;
     
@@ -148,7 +221,21 @@ app.get('/messages', async (req, res) => {
     }
 });
 
-// Route pour récupérer les messages d'un utilisateur
+
+
+
+// // Route pour récupérer les messages d'un utilisateur
+// app.get('/user-messages', checkAuth, async (req, res) => {
+//     try {
+//         const messages = await messagesCollection
+//             .find({ userId: req.user.userId })
+//             .toArray();
+        
+//         res.status(200).json(messages);
+//     } catch (err) {
+//         res.status(500).json({ message: 'Error retrieving user messages', error: err });
+//     }
+// });
 app.get('/user-messages', checkAuth, async (req, res) => {
     try {
         const messages = await messagesCollection

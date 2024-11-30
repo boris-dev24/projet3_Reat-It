@@ -65,29 +65,70 @@ const checkAuth = (req, res, next) => {
 //     }
 // });
 
+// app.post('/newMessage', checkAuth, async (req, res) => {
+//     const { title, text } = req.body;
+
+//     try {
+//         const response = await fetch('http://localhost:3002/message', {
+//             method: 'POST',
+//             headers: {
+//                 'Content-Type': 'application/json',
+//                 'Authorization': req.headers['authorization'] // Forward the token
+//             },
+//             body: JSON.stringify({ 
+//                 title, 
+//                 text,
+//                 userId: req.user.userId // Include user ID
+//             })
+//         });
+
+//         const data = await response.json();
+        
+//         if (response.ok) {
+//             res.status(200).json(data);
+//         } else {
+//             res.status(response.status).json(data);
+//         }
+//     } catch (err) {
+//         console.error('Error calling backend API:', err);
+//         res.status(500).json({ message: 'Server error', error: err.message });
+//     }
+// });
 app.post('/newMessage', checkAuth, async (req, res) => {
     const { title, text } = req.body;
 
     try {
-        const response = await fetch('http://localhost:3002/message', {
+        // Récupérer le token JWT pour le transmettre
+        const token = req.headers['authorization'];
+
+        const response = await fetch('http://localhost:3001/get-username', {
+            method: 'GET',
+            headers: {
+                'Authorization': token
+            }
+        });
+
+        const userData = await response.json();
+
+        const backendResponse = await fetch('http://localhost:3002/message', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'Authorization': req.headers['authorization'] // Forward the token
+                'Authorization': token
             },
             body: JSON.stringify({ 
                 title, 
                 text,
-                userId: req.user.userId // Include user ID
+                username: userData.username // Transmettre explicitement le username
             })
         });
 
-        const data = await response.json();
+        const data = await backendResponse.json();
         
-        if (response.ok) {
+        if (backendResponse.ok) {
             res.status(200).json(data);
         } else {
-            res.status(response.status).json(data);
+            res.status(backendResponse.status).json(data);
         }
     } catch (err) {
         console.error('Error calling backend API:', err);
