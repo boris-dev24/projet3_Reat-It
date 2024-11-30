@@ -1,0 +1,22 @@
+.hidden{
+    display: none;
+}
+
+.sub-menu {
+    background-color: white;
+    border: 1px solid #ccc;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    display: flex;
+    flex-direction: column;
+}
+
+.sub-menu button {
+    padding: 10px;
+    border: none;
+    text-align: left;
+    background: none;
+}
+
+.sub-menu button:hover {
+    background-color: #f0f0f0;
+}

@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>READ-IT</title>
+    <link rel="stylesheet" href="main.css"/>
+    <script type="text/javascript" src="main.js" defer></script>
+</head>
+<body>
+    <header>
+        <h1 class="titre">Read It</h1>
+        <div class="welcomMessage" id="welcome"></div>
+        <nav>
+            <button class="hidden navHead" id="newMessage">Nouveau message</button>
+            <input class="search" placeholder="Veuillez entrer le terme de votre recherche"/>
+            <button class="hidden navHead" id="addAnswer">Ajouter une réponse</button>
+            <button class="hidden navHead" id="logIn">Se connecter</button>
+            <button class="hidden navHead" id="register">S'inscrire</button>
+            <button class="hidden navHead" id="logOut">Se déconnecter</button>
+            <button class="hidden navHead" id="user"><span id="activeUser"></span></button>
+            <button class="hidden navHead" id="profil">Profil</button>
+            <button class="hidden navHead" id="messages">Mes messages</button>
+        </nav>
+    </header>
+    <main>
+        <!-- Formulaire de message -->
+        <div id="home" class="home"></div>
+        <div id="newMessageForm" class="newMessage hidden">
+            <label class="lbl">Titre:</label>
+            <input class="newMessageTitle" placeholder="Donnez un titre a votre message" required/>
+            <label class="lbl">Message:</label>
+            <input class="newMessageContent" placeholder="Entrez votre message" required/>
+            <button class="btn" id="sendMessageButton">Envoyer</button>
+            <button class="btn" id="cancelMessageButton">Annuler</button>
+        </div>
+        <div id="newAnswerForm" class="newAnswer hidden">
+            <label class="lbl">Réponse:</label>
+            <input class="newAnswerContent" placeholder="Entrez votre réponse" required/>
+            <button class="btn" id="sendAnswerButton">Envoyer</button>
+            <button class="btn" id="cancelAnswerButton">Annuler</button>
+        </div>
+        <div id="registerPage" class="hidden">
+            <h2>S'inscrire</h2>
+            <label class="registerName">Nom:</label>
+            <input type="text" id="registerName" placeholder="Entrez votre nom" required>
+            <br>
+            <label class="registerUserName">Nom d'utilisateur:</label>
+            <input id="registerUserName" placeholder="Entrz un nom d'utilisateur" required>
+            <br>
+            <label class="registerPassword">Mot de passe:</label>
+            <input type="password" id="registerPassword" placeholder="Choisissez un mot de passe" required>
+            <br>
+                Profil :
+                <label>
+                    <input type="radio" id="profile-user" name="profile" value="user" required>
+                    Utilisateur
+                </label>
+                <label>
+                    <input type="radio" id="profile-admin" name="profile" value="admin" required>
+                    Administrateur
+                </label>
+                <br>
+            <button type="submit">Soumettre</button>
+        </div>
+        <br>
+        <div id="logInPage" class="hidden">
+            <h2>Se connecter</h2>
+            <label class="logInUserName">Nom d'utilisateur:</label>
+            <input id="logInUserName" name="username" placeholder="Entrez votre nom d'utilisateur" required>
+            <br>
+            <label class="logInPassword">Mot de passe:</label>
+            <input type="password" id="logInPassword" name="password" placeholder="Entrez votre mot de passe" required>
+            <br>
+            <button type="submit">Soumettre</button>
+        </div>
+    </main>
+    <footer>
+        <p>&copy; 2024 READ-IT. Tous droits réservés.</p>
+    </footer>
+</body>
+</html>
