@@ -265,3 +265,15 @@ app.delete('/message/:messageId', checkAuth, async (req, res) => {
         res.status(500).json({ message: 'Error deleting message', error: err });
     }
 });
+
+// API affiches des messages utilisateurs au chargement du site
+app.get('/messages', checkAuth, async (req, res) => {
+    try {
+        // Ici, vous récupérez tous les messages depuis votre base de données ou autre source
+        const messages = await getMessagesFromDatabase(); // Remplacez par votre logique
+        res.status(200).json(messages);
+    } catch (err) {
+        console.error('Erreur lors de la récupération des messages:', err);
+        res.status(500).json({ message: 'Erreur serveur' });
+    }
+});

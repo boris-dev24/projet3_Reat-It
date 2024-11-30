@@ -294,6 +294,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+
     // Fonction pour afficher les messages
     function displayMessages(messages) {
         homeSection.innerHTML = '';
@@ -317,7 +318,7 @@ document.addEventListener('DOMContentLoaded', () => {
             homeSection.appendChild(messageElement);
         });
     }
-
+      fetchMessages();
 
     messagesBtn.addEventListener('click', async () => {
         if (!currentToken) {
@@ -344,3 +345,5 @@ document.addEventListener('DOMContentLoaded', () => {
     // Initialisation
     updateUIBasedOnAuthStatus();
 });
+
+   
