@@ -1,137 +1,173 @@
-const http = require('http');
+
+const express = require('express');
 const cors = require('cors');
 const jwt = require('jsonwebtoken');
-const express = require('express');
 const bodyParser = require('body-parser');
-const fs = require('fs');
+const path = require('path');
 
 const app = express();
 const PORT = 3000;
 
-app.use(express.static(__dirname + '/public'));
+// Configuration CORS sécurisée
+app.use(cors({
+    origin: 'http://localhost:3000', 
+    methods: ['GET', 'POST', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization']
+}));
 
-// Middleware pour parser le JSON
+app.use(express.static(path.join(__dirname, 'public')));
 app.use(bodyParser.json());
-app.use(cors());
 
-// Démarrage du serveur
-app.listen(PORT, () => {
-    console.log(`Serveur démarré sur http://localhost:${PORT}`);
-});
+// Services de configuration
+const AUTH_SERVICE = 'http://localhost:3001';
+const MESSAGE_SERVICE = 'http://localhost:3002';
+const JWT_SECRET = process.env.JWT_SECRET || 'clé_secrète_temporaire';
 
-app.get('/', (req, res) => {
-    let fileName = __dirname + '/public/main.html';
-    res.sendFile(fileName);
-});
-
-// Middleware pour vérifier si l'utilisateur est authentifié
+// Middleware d'authentification centralisé
 const checkAuth = (req, res, next) => {
     const token = req.headers['authorization']?.split(' ')[1];
     if (!token) {
-        return res.status(401).json({ message: 'Unauthorized, please login' });
+        return res.status(401).json({ message: 'Authentification requise' });
     }
-    jwt.verify(token, 'votre_clé_secrète', (err, decoded) => {
-        if (err) {
-            return res.status(401).json({ message: 'Invalid token' });
-        }
-        req.user = decoded;
-        next();
-    });
-};
-
-// // Route pour créer un message
-// app.post('/newMessage', checkAuth, async (req, res) => {
-//     const { title, text } = req.body;
-
-//     // Appel à l'API du backend (localhost:3001)
-//     try {
-//         const response = await fetch('http://localhost:3002/message', {
-//             method: 'POST',
-//             headers: {
-//                 'Content-Type': 'application/json',
-//             },
-//             body: JSON.stringify({ title, text })
-//         });
-
-//         const data = await response.json();
-//         if (data.status === 'ok') {
-//             res.status(200).json({ status: 'ok', message: { id: data.id, title: data.title, text: data.text } });
-//         } else {
-//             res.status(500).json({ message: 'Error saving message' });
-//         }
-//     } catch (err) {
-//         console.error('Erreur lors de l\'appel à l\'API backend:', err);
-//         res.status(500).json({ message: 'Server error', error: err });
-//     }
-// });
-
-// app.post('/newMessage', checkAuth, async (req, res) => {
-//     const { title, text } = req.body;
-
-//     try {
-//         const response = await fetch('http://localhost:3002/message', {
-//             method: 'POST',
-//             headers: {
-//                 'Content-Type': 'application/json',
-//                 'Authorization': req.headers['authorization'] // Forward the token
-//             },
-//             body: JSON.stringify({ 
-//                 title, 
-//                 text,
-//                 userId: req.user.userId // Include user ID
-//             })
-//         });
-
-//         const data = await response.json();
-        
-//         if (response.ok) {
-//             res.status(200).json(data);
-//         } else {
-//             res.status(response.status).json(data);
-//         }
-//     } catch (err) {
-//         console.error('Error calling backend API:', err);
-//         res.status(500).json({ message: 'Server error', error: err.message });
-//     }
-// });
-app.post('/newMessage', checkAuth, async (req, res) => {
-    const { title, text } = req.body;
 
     try {
-        // Récupérer le token JWT pour le transmettre
-        const token = req.headers['authorization'];
-
-        const response = await fetch('http://localhost:3001/get-username', {
-            method: 'GET',
-            headers: {
-                'Authorization': token
-            }
-        });
-
-        const userData = await response.json();
-
-        const backendResponse = await fetch('http://localhost:3002/message', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': token
-            },
-            body: JSON.stringify({ 
-                title, 
-                text,
-                username: userData.username // Transmettre explicitement le username
-            })
-        });
-
-        const data = await backendResponse.json();
-        
-        if (backendResponse.ok) {
-            res.status(200).json(data);
-        } else {
-            res.status(backendResponse.status).json(data);
-        }
+        const decoded = jwt.verify(token, JWT_SECRET);
+        req.user = decoded;
+        next();
     } catch (err) {
-        console.error('Error calling backend API:', err);
-        res.status(500).json({ message: 'Server error', error: err.message });
+        return res.status(401).json({ message: 'Token invalide' });
+    }
+};
+
+// Routes d'authentification
+app.post('/register', async (req, res) => {
+    try {
+        const response = await fetch(`${AUTH_SERVICE}/register`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(req.body)
+        });
+        const data = await response.json();
+        res.status(response.status).json(data);
+    } catch (error) {
+        res.status(500).json({ message: 'Erreur d\'inscription' });
     }
 });
+
+app.post('/login', async (req, res) => {
+    try {
+        const response = await fetch(`${AUTH_SERVICE}/login`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(req.body)
+        });
+        const data = await response.json();
+        res.status(response.status).json(data);
+    } catch (error) {
+        res.status(500).json({ message: 'Erreur de connexion' });
+    }
+});
+
+// Routes de messages
+app.post('/message', checkAuth, async (req, res) => {
+    try {
+        const response = await fetch(`${MESSAGE_SERVICE}/message`, {
+            method: 'POST',
+            headers: { 
+                'Content-Type': 'application/json',
+                'Authorization': req.headers['authorization']
+            },
+            body: JSON.stringify(req.body)
+        });
+        const data = await response.json();
+        res.status(response.status).json(data);
+    } catch (error) {
+        res.status(500).json({ message: 'Erreur de création de message' });
+    }
+});
+
+
+// Routes de messages (avec authentification optionnelle)
+app.get('/messages', checkAuth, async (req, res) => {
+    try {
+        const searchParam = req.query.search ? `?search=${encodeURIComponent(req.query.search)}` : '';
+        const pageParam = req.query.page ? `&page=${req.query.page}` : '';
+        
+        const headers = req.user 
+            ? { 'Authorization': req.headers['authorization'] } 
+            : {};
+
+        const response = await fetch(`${MESSAGE_SERVICE}/messages${searchParam}${pageParam}`, { headers });
+        const messages = await response.json();
+        res.status(response.status).json(messages);
+    } catch (error) {
+        res.status(500).json({ message: 'Erreur de récupération des messages' });
+    }
+});
+
+app.post('/message/:messageId/vote', checkAuth, async (req, res) => {
+    try {
+        const response = await fetch(`${MESSAGE_SERVICE}/message/${req.params.messageId}/vote`, {
+            method: 'POST',
+            headers: { 
+                'Content-Type': 'application/json',
+                'Authorization': req.headers['authorization']
+            },
+            body: JSON.stringify(req.body)
+        });
+        const data = await response.json();
+        res.status(response.status).json(data);
+    } catch (error) {
+        res.status(500).json({ message: 'Erreur de vote' });
+    }
+});
+
+app.delete('/message/:messageId', checkAuth, async (req, res) => {
+    try {
+        const response = await fetch(`${MESSAGE_SERVICE}/message/${req.params.messageId}`, {
+            method: 'DELETE',
+            headers: { 'Authorization': req.headers['authorization'] }
+        });
+        const data = await response.json();
+        res.status(response.status).json(data);
+    } catch (error) {
+        res.status(500).json({ message: 'Erreur de suppression de message' });
+    }
+});
+
+
+// route pour le profil utilisateur
+app.get('/user-profile', checkAuth, async (req, res) => {
+    try {
+        const response = await fetch(`${AUTH_SERVICE}/user-profile`, {
+            method: 'GET',
+            headers: { 
+                'Content-Type': 'application/json',
+                'Authorization': req.headers['authorization']
+            }
+        });
+        const userData = await response.json();
+        res.status(200).json(userData);
+    } catch (error) {
+        res.status(500).json({ message: 'Erreur de récupération du profil' });
+    }
+});
+
+// route pour les messages de l'utilisateur
+app.get('/user-messages', checkAuth, async (req, res) => {
+    try {
+        const response = await fetch(`${MESSAGE_SERVICE}/user-messages`, {
+            method: 'GET',
+            headers: { 
+                'Content-Type': 'application/json',
+                'Authorization': req.headers['authorization']
+            }
+        });
+        const messages = await response.json();
+        res.status(200).json(messages);
+    } catch (error) {
+        res.status(500).json({ message: 'Erreur de récupération des messages' });
+    }
+});
+
+app.listen(PORT, () => console.log(`Serveur démarré sur http://localhost:${PORT}`));
