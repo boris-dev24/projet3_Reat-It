@@ -221,6 +221,11 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+
+
+
+    
+
     // Déconnexion 
     logOutBtn.addEventListener('click', () => {
         currentToken = null;
