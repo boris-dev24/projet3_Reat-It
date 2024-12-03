@@ -74,6 +74,12 @@ main {
     border-radius: 5px;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
     margin-bottom: 20px;
+    position: fixed;
+    top: 10px;
+    left: 10px;
+    z-index: 1000;
+    width: auto;
+    height: auto;
 }
 
 .lbl {
@@ -294,6 +300,16 @@ button {
     display: none;
 }
 
+#userProfilePage{
+    z-index: 1000;
+    position: fixed;            /* Fixe la div au centre de la fenêtre */
+    top: 50%;                   /* Centre la div verticalement */
+    left: 10%; 
+    width: 90%;                 /* Largeur adaptable */
+    height: 80%;
+    /* background-color: #e19b9b; */
+}
+
 /* Ajouter un léger fond d'ombre pour l'effet de focus */
 #userProfilePage p, #userProfilePage h2 {
     box-shadow: 0 0 5px rgba(0, 0, 0, 0.05);
@@ -307,6 +323,13 @@ button {
     background-color: #f9f9f9;
     border-radius: 8px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    position: fixed;            /* Fixe la div au centre de la fenêtre */
+    top: 10%;                   /* Centre la div verticalement */
+    left: 20%;
+    z-index: 1000;
+    
+    
+    
 }
 
 /* Style des messages individuels */
@@ -402,4 +425,7 @@ footer {
     background-color: #333;
     color: white;
     border-radius: 8px;
+    position: fixed;
+    bottom: 0;
+    width: 100%;
 }
