@@ -247,11 +247,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-
-
-
-
-
     // Déconnexion 
     logOutBtn.addEventListener('click', () => {
         currentToken = null;
@@ -302,25 +297,25 @@ document.addEventListener('DOMContentLoaded', () => {
         newMessageForm.classList.add('hidden');
     });
 
- 
+    // Fonction pour afficher les messages
     function displayMessages(messages, append = false) {
-        // Si ce n'est pas un chargement supplémentaire, vider la section
         if (!append) {
             homeSection.innerHTML = '';
         }
-    
-        // Vérifier si des messages existent
         if (messages.length === 0) {
-            homeSection.innerHTML = '<p>Aucun message trouvé.</p>';
+            targetElement.innerHTML = '<p>Aucun message trouvé.</p>';
             return;
         }
-    
+
         messages.forEach(message => {
             const messageElement = document.createElement('div');
             messageElement.classList.add('message');
             messageElement.dataset.messageId = message._id;
-    
-            // Création de l'élément de message avec toutes les fonctionnalités
+
+            const truncatedText = message.text.length > 250 
+                ? message.text.substring(0, 250) + '...'
+                : message.text;
+
             messageElement.innerHTML = `
                 <div class="message-header">
                     <h3>${message.title}</h3>
@@ -330,25 +325,27 @@ document.addEventListener('DOMContentLoaded', () => {
                     </div>
                 </div>
                 <div class="message-content">
-                    <p>${message.text}</p>
+                    <p>${truncatedText}</p>
                     ${message.text.length > 250 ? 
                         '<button class="expand-message">Voir plus</button>' : ''}
                 </div>
                 <div class="message-interactions">
-                    ${currentToken ? `
-                        <div class="vote-section">
-                            <button class="like-btn" data-message-id="${message._id}">👍 ${message.likes || 0}</button>
-                            <button class="dislike-btn" data-message-id="${message._id}">👎 ${message.dislikes || 0}</button>
-                            <span>Solde: ${(message.likes || 0) - (message.dislikes || 0)}</span>
-                        </div>
-                        <button class="add-answer-btn">Ajouter une réponse</button>
-                    ` : ''}
-                    ${currentUser && currentUser.profil === 'admin' ? 
-                        '<button class="delete-message-btn">🗑️</button>' : ''}
+                    <div class="vote-section">
+                        <button class="like-btn" data-message-id="${message._id}">👍 </button>
+                        <span> ${(message.likes || 0) - (message.dislikes || 0)}</span>
+                        ${currentToken ? `
+                            
+                                <button class="dislike-btn" data-message-id="${message._id}">👎 </button>
+                            
+                            <button class="add-answer-btn">Ajouter une réponse</button>
+                        ` : ''}
+                        ${currentUser && currentUser.profil === 'admin' ? 
+                            '<button class="delete-message-btn">🗑️</button>' : ''}
+                    </div>
                 </div>
                 <div class="answers-section"></div>
             `;
-    
+
             // Gestion de "Voir plus"
             const expandBtn = messageElement.querySelector('.expand-message');
             if (expandBtn) {
@@ -357,31 +354,27 @@ document.addEventListener('DOMContentLoaded', () => {
                     expandBtn.remove();
                 });
             }
-    
-            // Gestion des likes/dislikes (uniquement si connecté)
-            if (currentToken) {
-                const likeBtn = messageElement.querySelector('.like-btn');
-                const dislikeBtn = messageElement.querySelector('.dislike-btn');
-    
-                if (likeBtn) {
-                    likeBtn.addEventListener('click', () => voteOnMessage(message._id, 'like'));
-                }
-                if (dislikeBtn) {
-                    dislikeBtn.addEventListener('click', () => voteOnMessage(message._id, 'dislike'));
-                }
+
+            // Gestion des likes/dislikes
+            const likeBtn = messageElement.querySelector('.like-btn');
+            const dislikeBtn = messageElement.querySelector('.dislike-btn');
+
+            if (likeBtn) {
+                likeBtn.addEventListener('click', () => voteOnMessage(message._id, 'like'));
             }
-    
+            if (dislikeBtn) {
+                dislikeBtn.addEventListener('click', () => voteOnMessage(message._id, 'dislike'));
+            }
+
             // Gestion suppression par admin
-            if (currentUser && currentUser.profil === 'admin') {
-                const deleteBtn = messageElement.querySelector('.delete-message-btn');
-                if (deleteBtn) {
-                    deleteBtn.addEventListener('click', () => deleteMessage(message._id));
-                }
+            const deleteBtn = messageElement.querySelector('.delete-message-btn');
+            if (deleteBtn) {
+                deleteBtn.addEventListener('click', () => deleteMessage(message._id));
             }
-    
+
             homeSection.appendChild(messageElement);
         });
-    
+
         // Gestion du bouton "Voir plus"
         loadMoreBtn.classList.toggle('hidden', messages.length < 10);
         if (!append) {
