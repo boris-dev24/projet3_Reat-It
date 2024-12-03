@@ -119,6 +119,281 @@ button#cancelMessageButton:hover, button#cancelAnswerButton:hover {
     display: none;
 }
 
+
+/* Conteneur principal des messages */
+.messages-container {
+    width: 80%;
+    max-width: 900px;
+    margin-top: 20px;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    overflow-y: auto;
+}
+
+/* Style des messages */
+.message {
+    background-color: #fafafa;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    margin-bottom: 15px;
+    padding: 15px;
+    position: relative;
+}
+
+.message-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
+}
+
+.message-header h3 {
+    font-size: 1.4rem;
+    margin: 0;
+    font-weight: bold;
+}
+
+.message-meta {
+    font-size: 0.9rem;
+    color: #888;
+}
+
+.message-content {
+    margin: 10px 0;
+    font-size: 1rem;
+    color: #333;
+}
+
+.message-content p {
+    margin: 0;
+}
+
+/* Bouton "Voir plus" */
+.expand-message {
+    background-color: transparent;
+    color: #007bff;
+    border: none;
+    cursor: pointer;
+    font-size: 0.9rem;
+    text-decoration: underline;
+}
+
+.expand-message:hover {
+    color: #0056b3;
+}
+
+/* Section des interactions */
+.message-interactions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.9rem;
+    margin-top: 10px;
+}
+
+.vote-section {
+    display: flex;
+    align-items: center;
+}
+
+.vote-section button {
+    background-color: #f0f0f0;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    padding: 5px 10px;
+    cursor: pointer;
+    margin-right: 10px;
+}
+
+.vote-section button:hover {
+    background-color: #e0e0e0;
+}
+
+.add-answer-btn {
+    background-color: #28a745;
+    color: white;
+    padding: 5px 15px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.add-answer-btn:hover {
+    background-color: #218838;
+}
+
+.delete-message-btn {
+    background-color: #dc3545;
+    color: white;
+    padding: 5px 10px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.delete-message-btn:hover {
+    background-color: #c82333;
+}
+
+/* Section des réponses */
+.answers-section {
+    margin-top: 15px;
+    padding-left: 20px;
+    border-left: 2px solid #f0f0f0;
+}
+
+.answers-section .answer {
+    margin-bottom: 10px;
+    background-color: #e9ecef;
+    padding: 10px;
+    border-radius: 5px;
+}
+
+/* Style pour les administrateurs */
+.admin-button {
+    background-color: #ff6347;
+    color: white;
+    padding: 5px 10px;
+    cursor: pointer;
+}
+
+.admin-button:hover {
+    background-color: #ff4500;
+}
+
+/* Pour les boutons d'action supplémentaires */
+button {
+    cursor: pointer;
+}
+
+/* Style des messages et interactions quand l'utilisateur n'est pas connecté */
+/* .message-interactions {
+    display: none;
+} */
+
+#closeProfileBtn {
+    display: block;
+    width: 100%;
+    padding: 10px;
+    background-color: #ff4747;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+#closeProfileBtn:hover {
+    background-color: #ff2a2a;
+}
+
+/* Ajouter une classe pour masquer le profil */
+.hidden {
+    display: none;
+}
+
+/* Ajouter un léger fond d'ombre pour l'effet de focus */
+#userProfilePage p, #userProfilePage h2 {
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.05);
+}
+
+#messagesContains {
+    width: 100%;
+    max-width: 800px;
+    margin: 20px auto;
+    padding: 20px;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Style des messages individuels */
+.message {
+    background-color: white;
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    box-shadow: 0 1px 5px rgba(0, 0, 0, 0.05);
+    transition: background-color 0.3s ease;
+}
+
+/* Lorsque l'on survole un message */
+.message:hover {
+    background-color: #f1f1f1;
+}
+
+/* Style pour le titre du message */
+.message h3 {
+    font-size: 20px;
+    color: #333;
+    margin-bottom: 10px;
+}
+
+/* Style pour le texte du message */
+.message p {
+    font-size: 16px;
+    color: #555;
+    margin-bottom: 15px;
+    line-height: 1.5;
+}
+
+/* Section pour les votes (likes/dislikes) */
+.message div {
+    font-size: 14px;
+    color: #777;
+    margin-bottom: 10px;
+}
+
+.message div:nth-child(3) {
+    margin-bottom: 5px; /* Ajustement pour espacer les réponses */
+}
+
+/* Style des réponses sous chaque message */
+.message ul {
+    list-style-type: none;
+    padding-left: 0;
+}
+
+.message ul li {
+    font-size: 14px;
+    color: #555;
+    margin-bottom: 5px;
+}
+
+/* Si aucune réponse n'est présente, on affiche ce message */
+.message ul li:first-child {
+    font-style: italic;
+    color: #888;
+}
+
+/* Bouton de fermeture de message */
+.closeMessageBtn {
+    display: inline-block;
+    padding: 8px 15px;
+    background-color: #ff4747;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    margin-top: 10px;
+}
+
+.closeMessageBtn:hover {
+    background-color: #ff2a2a;
+}
+
+/* Lorsque aucun message n'est trouvé */
+#messagesContains p {
+    font-size: 18px;
+    color: #888;
+    text-align: center;
+    padding: 20px;
+}
+
 /* Footer */
 footer {
     text-align: center;
