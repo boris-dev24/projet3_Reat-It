@@ -231,4 +231,35 @@ app.get('/user-messages', async (req, res) => {
     }
 });
 
+
+
+// Route pour ajouter une réponse
+app.post('/message/:messageId/answer', checkAuth, async (req, res) => {
+    try {
+        const response = await fetch(`${MESSAGE_SERVICE}/message/${req.params.messageId}/answer`, {
+            method: 'POST',
+            headers: { 
+                'Content-Type': 'application/json',
+                'Authorization': req.headers['authorization']
+            },
+            body: JSON.stringify(req.body)
+        });
+        const data = await response.json();
+        res.status(response.status).json(data);
+    } catch (error) {
+        res.status(500).json({ message: 'Erreur d\'ajout de réponse' });
+    }
+});
+
+// Route pour récupérer les réponses d'un message
+app.get('/message/:messageId/answers', async (req, res) => {
+    try {
+        const response = await fetch(`${MESSAGE_SERVICE}/message/${req.params.messageId}/answers`);
+        const answers = await response.json();
+        res.status(response.status).json(answers);
+    } catch (error) {
+        res.status(500).json({ message: 'Erreur de récupération des réponses' });
+    }
+});
+
 app.listen(PORT, () => console.log(`Serveur démarré sur http://localhost:${PORT}`));
