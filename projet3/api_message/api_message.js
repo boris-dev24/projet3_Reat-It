@@ -84,7 +84,35 @@ app.post('/newMessage', checkAuth, async (req, res) => {
     }
 });
 
-// Récupérer les messages avec pagination et recherche
+// // Récupérer les messages avec pagination et recherche
+// app.get('/messages', async (req, res) => {
+//     try {
+//         const { search, page = 1 } = req.query;
+//         const limit = 10;
+//         const skip = (page - 1) * limit;
+
+//         let query = {};
+//         if (search) {
+//             query = {
+//                 $or: [
+//                     { title: { $regex: search, $options: 'i' } },
+//                     { text: { $regex: search, $options: 'i' } }
+//                 ]
+//             };
+//         }
+        
+//         const messages = await messagesCollection
+//             .find(query)
+//             .sort({ createdAt: -1 })
+//             .skip(skip)
+//             .limit(limit)
+//             .toArray();
+        
+//         res.status(200).json(messages);
+//     } catch (err) {
+//         res.status(500).json({ message: 'Erreur de récupération des messages' });
+//     }
+// });
 app.get('/messages', async (req, res) => {
     try {
         const { search, page = 1 } = req.query;
@@ -108,7 +136,15 @@ app.get('/messages', async (req, res) => {
             .limit(limit)
             .toArray();
         
-        res.status(200).json(messages);
+        // Tronquer les messages à 250 caractères
+        const processedMessages = messages.map(message => ({
+            ...message,
+            text: message.text.length > 250 
+                ? message.text.substring(0, 250) + '...'
+                : message.text
+        }));
+        
+        res.status(200).json(processedMessages);
     } catch (err) {
         res.status(500).json({ message: 'Erreur de récupération des messages' });
     }

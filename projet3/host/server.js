@@ -71,7 +71,7 @@ app.post('/login', async (req, res) => {
 // Routes de messages
 app.post('/newMessages', checkAuth, async (req, res) => {
     try {
-        const response = await fetch(`${MESSAGE_SERVICE}/message`, {
+        const response = await fetch(`${MESSAGE_SERVICE}/newMessage`, {
             method: 'POST',
             headers: { 
                 'Content-Type': 'application/json',
@@ -87,8 +87,24 @@ app.post('/newMessages', checkAuth, async (req, res) => {
 });
 
 
-// Routes de messages (avec authentification optionnelle)
-app.get('/messages', checkAuth, async (req, res) => {
+// // Routes de messages (avec authentification optionnelle)
+// app.get('/messages', checkAuth, async (req, res) => {
+//     try {
+//         const searchParam = req.query.search ? `?search=${encodeURIComponent(req.query.search)}` : '';
+//         const pageParam = req.query.page ? `&page=${req.query.page}` : '';
+        
+//         const headers = req.user 
+//             ? { 'Authorization': req.headers['authorization'] } 
+//             : {};
+
+//         const response = await fetch(`${MESSAGE_SERVICE}/messages${searchParam}${pageParam}`, { headers });
+//         const messages = await response.json();
+//         res.status(response.status).json(messages);
+//     } catch (error) {
+//         res.status(500).json({ message: 'Erreur de récupération des messages' });
+//     }
+// });
+app.get('/messages', async (req, res) => {
     try {
         const searchParam = req.query.search ? `?search=${encodeURIComponent(req.query.search)}` : '';
         const pageParam = req.query.page ? `&page=${req.query.page}` : '';
@@ -96,6 +112,11 @@ app.get('/messages', checkAuth, async (req, res) => {
         const headers = req.user 
             ? { 'Authorization': req.headers['authorization'] } 
             : {};
+
+        // Si pas de token et pas de recherche, renvoyer une liste vide
+        if (!req.headers['authorization'] && !req.query.search) {
+            return res.json([]);
+        }
 
         const response = await fetch(`${MESSAGE_SERVICE}/messages${searchParam}${pageParam}`, { headers });
         const messages = await response.json();

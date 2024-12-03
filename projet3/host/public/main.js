@@ -129,7 +129,7 @@ document.addEventListener('DOMContentLoaded', () => {
     //     fetchUserMessages();
     // })
 
-    // Nouvelle fonction pour récupérer les messages de l'utilisateur
+    // fonction pour récupérer les messages de l'utilisateur
     async function fetchUserMessages() {
         try {
             const response = await fetch('http://localhost:3000/user-messages', {
@@ -276,7 +276,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const text = document.querySelector('.newMessageContent').value;
 
         try {
-            const response = await fetch('http://localhost:3000/api/messages/newMessage', {
+            const response = await fetch('newMessages/', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -302,25 +302,25 @@ document.addEventListener('DOMContentLoaded', () => {
         newMessageForm.classList.add('hidden');
     });
 
-    // Fonction pour afficher les messages
+ 
     function displayMessages(messages, append = false) {
+        // Si ce n'est pas un chargement supplémentaire, vider la section
         if (!append) {
             homeSection.innerHTML = '';
         }
+    
+        // Vérifier si des messages existent
         if (messages.length === 0) {
-            targetElement.innerHTML = '<p>Aucun message trouvé.</p>';
+            homeSection.innerHTML = '<p>Aucun message trouvé.</p>';
             return;
         }
-
+    
         messages.forEach(message => {
             const messageElement = document.createElement('div');
             messageElement.classList.add('message');
             messageElement.dataset.messageId = message._id;
-
-            const truncatedText = message.text.length > 250 
-                ? message.text.substring(0, 250) + '...'
-                : message.text;
-
+    
+            // Création de l'élément de message avec toutes les fonctionnalités
             messageElement.innerHTML = `
                 <div class="message-header">
                     <h3>${message.title}</h3>
@@ -330,7 +330,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     </div>
                 </div>
                 <div class="message-content">
-                    <p>${truncatedText}</p>
+                    <p>${message.text}</p>
                     ${message.text.length > 250 ? 
                         '<button class="expand-message">Voir plus</button>' : ''}
                 </div>
@@ -348,7 +348,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 </div>
                 <div class="answers-section"></div>
             `;
-
+    
             // Gestion de "Voir plus"
             const expandBtn = messageElement.querySelector('.expand-message');
             if (expandBtn) {
@@ -357,27 +357,31 @@ document.addEventListener('DOMContentLoaded', () => {
                     expandBtn.remove();
                 });
             }
-
-            // Gestion des likes/dislikes
-            const likeBtn = messageElement.querySelector('.like-btn');
-            const dislikeBtn = messageElement.querySelector('.dislike-btn');
-
-            if (likeBtn) {
-                likeBtn.addEventListener('click', () => voteOnMessage(message._id, 'like'));
+    
+            // Gestion des likes/dislikes (uniquement si connecté)
+            if (currentToken) {
+                const likeBtn = messageElement.querySelector('.like-btn');
+                const dislikeBtn = messageElement.querySelector('.dislike-btn');
+    
+                if (likeBtn) {
+                    likeBtn.addEventListener('click', () => voteOnMessage(message._id, 'like'));
+                }
+                if (dislikeBtn) {
+                    dislikeBtn.addEventListener('click', () => voteOnMessage(message._id, 'dislike'));
+                }
             }
-            if (dislikeBtn) {
-                dislikeBtn.addEventListener('click', () => voteOnMessage(message._id, 'dislike'));
-            }
-
+    
             // Gestion suppression par admin
-            const deleteBtn = messageElement.querySelector('.delete-message-btn');
-            if (deleteBtn) {
-                deleteBtn.addEventListener('click', () => deleteMessage(message._id));
+            if (currentUser && currentUser.profil === 'admin') {
+                const deleteBtn = messageElement.querySelector('.delete-message-btn');
+                if (deleteBtn) {
+                    deleteBtn.addEventListener('click', () => deleteMessage(message._id));
+                }
             }
-
+    
             homeSection.appendChild(messageElement);
         });
-
+    
         // Gestion du bouton "Voir plus"
         loadMoreBtn.classList.toggle('hidden', messages.length < 10);
         if (!append) {
@@ -442,12 +446,15 @@ document.addEventListener('DOMContentLoaded', () => {
             }
     
             const messages = await response.json();
-            
-            // Vérifier que messages est bien un tableau
-            if (Array.isArray(messages)) {
-                displayMessages(messages);
+            //Pour afficher tous les messages quand un utilisateur est connecte
+            if (currentToken && !searchTerm) {
+                displayMessages(messages, page > 1);
+            }
+            //Pour ajouter les messages filtres
+            else if (messages.length > 0) {
+                displayMessages(messages, page > 1);
             } else {
-                console.error('La réponse n\'est pas un tableau', messages);
+                homeSection.innerHTML = '<p>Aucun message trouvé.</p>';
             }
         } catch (error) {
             console.error('Erreur de récupération des messages:', error);
@@ -469,7 +476,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Initialisation
     updateUIBasedOnAuthStatus();
-    fetchMessages();
+
+// Initialisation de la recherche et chargement des messages
+document.addEventListener('DOMContentLoaded', () => {
+    searchInput.value = ''; // Réinitialiser le champ de recherche
+    fetchMessages(''); // Charger tous les messages initiaux
+
+    // Événement de recherche en temps réel
+    searchInput.addEventListener('input', (e) => {
+        const searchTerm = e.target.value.trim();
+        currentPage = 1;
+        fetchMessages(searchTerm);
+    });
+});
 });
 
 document.getElementById('profil').addEventListener('click', async () => {
