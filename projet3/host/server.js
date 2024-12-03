@@ -69,7 +69,7 @@ app.post('/login', async (req, res) => {
 });
 
 // Routes de messages
-app.post('/message', checkAuth, async (req, res) => {
+app.post('/newMessages', checkAuth, async (req, res) => {
     try {
         const response = await fetch(`${MESSAGE_SERVICE}/message`, {
             method: 'POST',
@@ -167,6 +167,46 @@ app.get('/user-messages', checkAuth, async (req, res) => {
         res.status(200).json(messages);
     } catch (error) {
         res.status(500).json({ message: 'Erreur de récupération des messages' });
+    }
+});
+
+app.get('/user-profile', async (req, res) => {
+    try {
+        const token = req.headers.authorization;
+        const response = await fetch('http://localhost:3001/user-profile', {
+            method: 'GET',
+            headers: { Authorization: token }
+        });
+
+        if (!response.ok) {
+            return res.status(response.status).send('Erreur côté serveur principal');
+        }
+
+        const userData = await response.json();
+        res.json(userData); // Renvoie les données au client
+    } catch (error) {
+        console.error('Erreur côté serveur intermédiaire :', error);
+        res.status(500).send('Erreur interne');
+    }
+});
+
+app.get('/user-messages', async (req, res) => {
+    try {
+        const token = req.headers.authorization;
+        const response = await fetch('http://localhost:3002/user-messages', {
+            method: 'GET',
+            headers: { Authorization: token }
+        });
+
+        if (!response.ok) {
+            return res.status(response.status).send('Erreur côté serveur principal');
+        }
+
+        const userData = await response.json();
+        res.json(userData); // Renvoie les données au client
+    } catch (error) {
+        console.error('Erreur côté serveur intermédiaire :', error);
+        res.status(500).send('Erreur interne');
     }
 });
 

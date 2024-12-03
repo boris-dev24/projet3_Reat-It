@@ -53,7 +53,7 @@ const checkAuth = (req, res, next) => {
 };
 
 // Créer un message
-app.post('/message', checkAuth, async (req, res) => {
+app.post('/newMessage', checkAuth, async (req, res) => {
     try {
         const { title, text } = req.body;
         const user = await usersCollection.findOne({ _id: new ObjectId(req.user.userId) });

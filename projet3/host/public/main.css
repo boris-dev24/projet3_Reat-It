@@ -1,22 +1,130 @@
-.hidden{
+/* Réinitialisation des marges et paddings */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    font-size: 16px;
+    color: #333;
+    line-height: 1.6;
+    background-color: #f9f9f9;
+    padding: 0 20px;
+}
+
+/* Header */
+header {
+    background-color: #333;
+    color: #fff;
+    padding: 20px;
+    text-align: center;
+    border-radius: 8px;
+}
+
+.titre {
+    font-size: 2rem;
+    margin-bottom: 10px;
+}
+
+.welcomMessage {
+    font-style: italic;
+    margin-bottom: 10px;
+}
+
+nav {
+    margin-top: 10px;
+}
+
+nav button, .search {
+    padding: 10px 15px;
+    margin: 5px;
+    font-size: 1rem;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+nav button {
+    background-color: #007bff;
+    color: white;
+    transition: background-color 0.3s ease;
+}
+
+nav button:hover {
+    background-color: #0056b3;
+}
+
+.search {
+    width: 300px;
+    border: 1px solid #ddd;
+}
+
+/* Main */
+main {
+    margin: 20px 0;
+}
+
+/* Formulaires */
+.newMessage, .newAnswer, #registerPage, #logInPage {
+    padding: 20px;
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
+}
+
+.lbl {
+    display: block;
+    margin: 10px 0 5px;
+    font-weight: bold;
+}
+
+.newMessage input, .newAnswer input, #registerPage input, #logInPage input {
+    width: calc(100% - 20px);
+    padding: 10px;
+    margin-bottom: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+.btn {
+    padding: 10px 20px;
+    margin-right: 10px;
+    background-color: #28a745;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: background-color 0.3s ease;
+}
+
+.btn:hover {
+    background-color: #218838;
+}
+
+button#cancelMessageButton, button#cancelAnswerButton {
+    background-color: #dc3545;
+}
+
+button#cancelMessageButton:hover, button#cancelAnswerButton:hover {
+    background-color: #c82333;
+}
+
+/* Masquer les éléments non visibles */
+.hidden {
     display: none;
 }
 
-.sub-menu {
-    background-color: white;
-    border: 1px solid #ccc;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-    display: flex;
-    flex-direction: column;
-}
-
-.sub-menu button {
-    padding: 10px;
-    border: none;
-    text-align: left;
-    background: none;
-}
-
-.sub-menu button:hover {
-    background-color: #f0f0f0;
+/* Footer */
+footer {
+    text-align: center;
+    margin-top: 20px;
+    padding: 10px 0;
+    background-color: #333;
+    color: white;
+    border-radius: 8px;
 }
