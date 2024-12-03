@@ -82,6 +82,8 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    
+
     // Gestion du menu déroulant utilisateur
     welcomeMessage.addEventListener('click', () => {
         userProfileDropdown.classList.toggle('hidden');
@@ -123,10 +125,14 @@ document.addEventListener('DOMContentLoaded', () => {
         fetchUserMessages();
     });
 
+    // document.getElementById('messages').addEventListener('click', () =>{
+    //     fetchUserMessages();
+    // })
+
     // Nouvelle fonction pour récupérer les messages de l'utilisateur
     async function fetchUserMessages() {
         try {
-            const response = await fetch('/user-messages', {
+            const response = await fetch('http://localhost:3000/user-messages', {
                 headers: {
                     'Authorization': `Bearer ${currentToken}`
                 }
@@ -209,9 +215,29 @@ document.addEventListener('DOMContentLoaded', () => {
             if (response.ok) {
                 currentToken = data.token;
                 currentUser = { username, profil: data.profil };
+
+                 // Message welcome
+                const welcomeMessage = document.getElementById('welcome');
+                welcomeMessage.textContent = `Bienvenue, ${currentUser.username}`;
+
+                // mettre a jour le bouton de l'utilisateur
+                const userButton = document.getElementById('user');
+                userBtn.textContent = ` ${currentUser.username}`; // Affichage du nom d'utilisateur
+                userButton.classList.remove('hidden'); // Rendre le bouton visible
+
                 updateUIBasedOnAuthStatus();
                 logInPage.classList.add('hidden');
-                fetchMessages();
+                fetchMessages('');
+                 console.log(fetchMessages);
+                // Ajouter un écouteur d'événement sur le bouton 'user' pour afficher les autres boutons
+                userButton.addEventListener('click', () => {
+                const profilButton = document.getElementById('profil');
+                const messagesButton = document.getElementById('messages');
+
+                // Basculer la visibilité des boutons Profil et Messages
+                profilButton.classList.toggle('hidden');
+                messagesButton.classList.toggle('hidden');
+            });
             } else {
                 alert(data.message);
             }
@@ -224,7 +250,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
 
-    
+
 
     // Déconnexion 
     logOutBtn.addEventListener('click', () => {
@@ -250,7 +276,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const text = document.querySelector('.newMessageContent').value;
 
         try {
-            const response = await fetch('/newMessage', {
+            const response = await fetch('http://localhost:3000/api/messages/newMessage', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -444,4 +470,97 @@ document.addEventListener('DOMContentLoaded', () => {
     // Initialisation
     updateUIBasedOnAuthStatus();
     fetchMessages();
+});
+
+document.getElementById('profil').addEventListener('click', async () => {
+    try {
+        const response = await fetch('http://localhost:3000/user-profile', {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${currentToken}`
+            }
+        });
+        const userData = await response.json();
+
+        const userProfilePage = document.getElementById('userProfilePage');
+        userProfilePage.innerHTML = `
+            <h2>Profil de ${userData.username}</h2>
+            <p>Nom : ${userData.name}</p>
+            <p>Nom d'utilisateur : ${userData.username}</p>
+            <p>profil : ${userData.profil}</p>
+            <p>Date d'inscription : ${new Date(userData.createdAt).toLocaleDateString()}</p>
+            <button id="closeProfileBtn">Fermer</button>
+        `;
+        userProfilePage.classList.remove('hidden');
+
+        document.getElementById('closeProfileBtn').addEventListener('click', () => {
+            userProfilePage.classList.add('hidden');
+        });
+    } catch (error) {
+        console.error('Erreur lors de la récupération des données :', error);
+    }
+});
+
+
+// Gestionnaire d'événement pour afficher les messages de l'utilisateur
+document.getElementById('messages').addEventListener('click', async () => {
+    try {
+        // Requête pour récupérer les messages de l'utilisateur
+        const response = await fetch('http://localhost:3000/user-messages', {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${currentToken}`,
+            }
+        });
+
+        if (!response.ok) {
+            throw new Error('Erreur côté serveur');
+        }
+
+        // Récupérer les messages
+        const messages = await response.json();
+
+        const userMessagesContainer = document.getElementById('messagesContains');
+        userMessagesContainer.innerHTML = ''; // Vider le contenu précédent
+
+        // Vérifier si des messages existent
+        if (messages.length === 0) {
+            userMessagesContainer.innerHTML = `<p>Aucun message trouvé.</p>`;
+        } else {
+            // Boucle pour afficher chaque message
+            messages.forEach(message => {
+                const messageElement = document.createElement('div');
+                messageElement.classList.add('message'); // Ajouter une classe pour le style
+
+                messageElement.innerHTML = `
+                    <h3>${message.title}</h3>
+                    <p>${message.text}</p>
+                    <div>Likes: ${message.likes}</div>
+                    <div>Dislikes: ${message.dislikes}</div>
+                    <div>Réponses:</div>
+                    <ul>
+                        ${message.answers ? message.answers.map(answer => `<li>${answer}</li>`).join('') : '<li>Aucune réponse</li>'}
+                    </ul>
+                    <button class="closeMessageBtn">Fermer</button>
+                `;
+                
+                userMessagesContainer.appendChild(messageElement);
+            });
+        }
+
+        // Afficher le container des messages
+        userMessagesContainer.classList.remove('hidden');
+
+        // Ajouter un gestionnaire de clic pour chaque bouton "Fermer"
+        const closeButtons = document.querySelectorAll('.closeMessageBtn');
+        closeButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                userMessagesContainer.classList.add('hidden');
+            });
+        });
+
+    } catch (error) {
+        console.error('Erreur:', error);
+        alert('Une erreur est survenue lors du chargement des messages');
+    }
 });

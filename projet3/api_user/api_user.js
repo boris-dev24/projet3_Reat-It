@@ -110,4 +110,33 @@ app.post('/login', async (req, res) => {
     }
 });
 
+// Route pour récupérer le profil utilisateur
+app.get('/user-profile', checkAuth, async (req, res) => {
+    try {
+        // `req.user` est défini par le middleware `checkAuth`
+        const { userId } = req.user;
+
+        // Recherchez l'utilisateur dans la base de données par son ID
+        const user = await usersCollection.findOne({ _id: new ObjectId(userId) });
+
+        if (!user) {
+            return res.status(404).json({ message: 'Utilisateur non trouvé' });
+        }
+
+        // Préparez les données utilisateur à retourner
+        const userData = {
+            username: user.username,
+            name: user.name,
+            profil: user.profil,
+            createdAt: user.createdAt,
+        };
+
+        res.status(200).json(userData);
+    } catch (err) {
+        console.error('Erreur lors de la récupération du profil utilisateur :', err);
+        res.status(500).json({ message: 'Erreur serveur' });
+    }
+});
+
+
 app.listen(PORT, () => console.log(`Service d'authentification sur http://localhost:${PORT}`));
